@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "cafe",
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -72,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "barista_salary_calculator.wsgi.application"
 
+AUTH_USER_MODEL = "user.User"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
