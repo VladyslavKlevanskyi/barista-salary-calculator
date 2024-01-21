@@ -2,6 +2,25 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+def calculation_salary(income: int, rate: "Rate") -> int:
+    """
+    :param income: - Cafe income per day
+    :param rate: - Barista's rate in this cafe
+    :return: - If the income is less than min_wage, then the function
+    returns min_wage. If the income is greater than min_wage, then the function
+    returns the result of the calculation using the formula:
+
+    income / 100 * rate.percent + rate.additive
+
+    We don't need much precision; we can round the value to an integer.
+    """
+    if income < rate.min_wage:
+        return int(rate.min_wage)
+    else:
+        salary = income / 100 * rate.percent + rate.additive
+        return int(salary)
+
+
 class Cafe(models.Model):
     """
     Cafe model with name field.
@@ -109,3 +128,53 @@ class Shift(models.Model):
     class Meta:
         unique_together = ("date", "cafe")
         ordering = ["date", "cafe", "barista"]
+
+
+class Income(models.Model):
+    """
+    The Income model is responsible for creating a shift for a certain
+    date in a certain cafe for one barista.
+    The Income has two parameters:
+
+    'date' - income date.
+
+    'income' - amount of income. In this project we can neglect accuracy.
+    We only need integers.
+
+    While saving income for a certain date, when running the clean() method,
+    the barisa's salary for a given shift is calculated using the
+    calculation_salary() function and entered into the 'salary' field in the
+    'Shift' model.
+    """
+
+    date = models.DateField(blank=False)
+    income = models.IntegerField(blank=False)
+    cafe = models.ForeignKey(
+        Cafe, on_delete=models.DO_NOTHING, blank=False, related_name="incomes"
+    )
+
+    def clean(self):
+        """
+        This method, using the calculation_salary() function, calculates the
+        salary of a barista in a specific cafe for one day and enters it into
+        the 'salary' field of the 'Shift' model
+        """
+
+        try:
+            shift = Shift.objects.get(date=self.date, cafe=self.cafe)
+        except Shift.DoesNotExists:
+            raise ValidationError("No barista on shift!")
+        try:
+            rate = Rate.objects.get(cafe=self.cafe, barista=shift.barista.id)
+        except Rate.DoesNotExists:
+            raise ValidationError("No barista rates for this cafe!")
+        salary = calculation_salary(income=self.income, rate=rate)
+        shift.salary = salary
+        shift.save()
+
+    def __str__(self):
+        return f"{self.date}, Cafe: {self.cafe}, Income - ${self.income}"
+
+    class Meta:
+        unique_together = ("date", "cafe")
+        ordering = ["date", "cafe"]
