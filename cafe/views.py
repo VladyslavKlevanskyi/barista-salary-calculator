@@ -169,7 +169,17 @@ class ShiftListView(generic.ListView):
 
 class ShiftCreateView(generic.CreateView):
     """
-    This view create a shift using a 'ShiftForm' form.
+    This view creates a shift using a 'ShiftForm' form.
+    """
+
+    model = Shift
+    form_class = ShiftForm
+    success_url = reverse_lazy("cafe:shift-list-view")
+
+
+class ShiftUpdateView(generic.UpdateView):
+    """
+    This view updates a shift using a 'ShiftForm' form.
     """
 
     model = Shift
