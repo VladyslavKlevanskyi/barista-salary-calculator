@@ -185,3 +185,12 @@ class ShiftUpdateView(generic.UpdateView):
     model = Shift
     form_class = ShiftForm
     success_url = reverse_lazy("cafe:shift-list-view")
+
+
+class ShiftDeleteView(generic.DeleteView):
+    """
+    This view deletes a shift using.
+    """
+
+    model = Shift
+    success_url = reverse_lazy("cafe:shift-list-view")
