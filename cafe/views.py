@@ -1,8 +1,9 @@
 from datetime import date, timedelta
 from typing import Dict, List
 from django.db.models import QuerySet
+from django.urls import reverse_lazy
 from django.views import generic
-from cafe.forms import DateRangeForm
+from cafe.forms import DateRangeForm, ShiftForm
 from cafe.models import Cafe, Barista, Shift
 
 
@@ -164,3 +165,13 @@ class ShiftListView(generic.ListView):
         context["schedule_array"] = schedule_array
 
         return context
+
+
+class ShiftCreateView(generic.CreateView):
+    """
+    This view create a shift using a 'ShiftForm' form.
+    """
+
+    model = Shift
+    form_class = ShiftForm
+    success_url = reverse_lazy("cafe:shift-list-view")
