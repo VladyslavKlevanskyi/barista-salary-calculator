@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+
+	<h1>Shift List</h1>
+
+	<div>
+
+		<form action="" method="get">
+			{{ date_range }}
+			<p><input type="submit" value="Show"></p>
+		</form>
+
+		<script>
+			$(function () {
+				$(".datepicker").datetimepicker({
+					format: "Y-m-d",
+					inline:true,
+					timepicker:false,
+				});
+			});
+		</script>
+
+	</div>
+
+	<div>
+		{% if shift_list %}
+			<table>
+				<tr>
+
+					<th> Date </th>
+
+					{% for cafe in column_headers %}
+						<th>{{ cafe }}</th>
+					{% endfor %}
+
+				</tr>
+
+				{% for line in schedule_array %}
+					<tr>
+						{% for item in line %}
+							<td>
+								{{ item.date }}
+								{{ item.name }}
+							</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+
+			</table>
+
+		{% else %}
+			<p>There are no shifts for the selected period!</p>
+		{% endif %}
+	</div>
+{% endblock %}
