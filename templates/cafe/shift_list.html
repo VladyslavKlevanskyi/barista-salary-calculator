@@ -54,6 +54,19 @@
 							<td>
 								{{ item.date }}
 								{{ item.name }}
+
+									{% if item.shift_id %}
+										<span style="font-size: 70%">
+											<a href="{% url 'cafe:shift-update' pk=item.shift_id %}">
+												edit
+											</a>
+											/
+											<a style="color: red" href="{% url 'cafe:shift-delete' pk=item.shift_id %}">
+												❌
+											</a>
+										</span>
+										{% endif %}
+
 							</td>
 						{% endfor %}
 					</tr>
