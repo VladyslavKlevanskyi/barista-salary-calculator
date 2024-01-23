@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Cafes</h1>
+
+	{% if cafe_list %}
+		<ul>
+			{% for cafe in  cafe_list %}
+				<li>
+					<strong><a href="#">{{ cafe }}</a></strong>
+				</li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>There are no cafes in database!</p>
+	{% endif %}
+
+{% endblock %}
