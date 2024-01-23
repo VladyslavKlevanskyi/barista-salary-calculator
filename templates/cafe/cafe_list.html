@@ -7,7 +7,7 @@
 		<ul>
 			{% for cafe in  cafe_list %}
 				<li>
-					<strong><a href="#">{{ cafe }}</a></strong>
+					<strong><a href="{% url 'cafe:cafe-detail-view' pk=cafe.id %}">{{ cafe }}</a></strong>
 				</li>
 			{% endfor %}
 		</ul>
