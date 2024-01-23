@@ -1,10 +1,10 @@
 from datetime import date, timedelta
 from typing import Dict, List
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 from django.urls import reverse_lazy
 from django.views import generic
 from cafe.forms import DateRangeForm, ShiftForm
-from cafe.models import Cafe, Barista, Shift
+from cafe.models import Cafe, Barista, Shift, Income
 
 
 def queryset_to_list(incoming_queryset: QuerySet, model: str) -> List[str]:
@@ -90,6 +90,57 @@ def schedule_array_creation(
     return schedule_array
 
 
+def income_array_creation(
+    incomes: QuerySet, start_date: str, end_date: str
+) -> List[Dict]:
+    """
+    This function creates a list. Each value in the list is a dictionary that
+    is needed to fill one line in the table on the page.
+
+    :param incomes: QuerySet of incomes for obtaining information
+    :param start_date: Range start date
+    :param end_date: Range end date
+
+    :return: The function returns a list. Each value in the list is a
+    dictionary. Each dictionary has three keys: 'date', 'income' and 'id'
+    (example: {'date': '2024-01-16', 'income': 100, 'id': 2}).
+    The values of these keys correspond to the values of one income instance
+    from the Income model.
+
+    Example of returning list:
+    [{'date': '2024-01-16', 'income': 100, 'id': 2},
+     {'date': '2024-01-17', 'income': 0, 'id': None},
+     {'date': '2024-01-18', 'income': 4560, 'id': 3}]
+    """
+
+    income_array = []
+    income_dict = {}
+
+    start_date_format = date.fromisoformat(start_date)
+    end_date_format = date.fromisoformat(end_date)
+    delta = end_date_format - start_date_format
+
+    # Create a dictionary in which the keys are dates from the range and the
+    # values are a dictionary with two keys. 'income': 0 and 'id': None.
+    for index in range(delta.days + 1):
+        date_insert = str(start_date_format + timedelta(index))
+        income_dict[date_insert] = {"income": 0, "id": None}
+
+    # Go through the cycle through the incomes and fill the 'income_dict'
+    # dictionary with information form DB.
+    for income in incomes:
+        income_dict[str(income.date)] = {"income": income.income, "id": income.id}
+
+    # Convert the dictionary into a list of the desired view
+    for day, income in income_dict.items():
+        income_day = {"date": day}
+        income_day["income"] = income["income"]
+        income_day["id"] = income["id"]
+        income_array.append(income_day)
+
+    return income_array
+
+
 class Index(generic.TemplateView):
     """
     Index page displaying the total number of cafes and baristas.
@@ -117,6 +168,59 @@ class CafeListView(generic.ListView):
     model = Cafe
 
 
+class CafeDetailView(generic.DetailView):
+    """
+    This view displays information about income a specified period for one
+    cafe.
+    """
+
+    model = Cafe
+
+    def get_context_data(self, **kwargs):
+        """
+        We override this method to add such data to the context as
+        'date_range', 'income_array' and 'total_income'.
+
+        'date_range' - date range for which we can view shifts. Uses
+        DateRangeForm. By default, the 'start_date' is a date seven days ago
+        from the current one, and the 'end_date' is a date seven days ahead
+        from the current one. So, by default, when we go to the page for the
+        first time, we will see a range of shifts for two weeks, where the
+        current date will be in the middle.
+
+        'income_array' - an array for displaying information in the income
+        table on the page. To create an array, use the income_array_creation()
+        function.
+
+        'total_income' - amount of income for the specified period.
+        """
+
+        context = super().get_context_data(**kwargs)
+
+        start_date = self.request.GET.get(
+            "start_date", str(date.today() - timedelta(7))
+        )
+        end_date = self.request.GET.get("end_date", str(date.today() + timedelta(7)))
+
+        context["date_range"] = DateRangeForm(
+            initial={"start_date": start_date, "end_date": end_date}
+        )
+
+        incomes = Income.objects.select_related("cafe").filter(
+            cafe=self.object.id,
+            date__gte=start_date,
+            date__lte=end_date,
+        )
+
+        income_array = income_array_creation(incomes, start_date, end_date)
+        total_income = incomes.aggregate(Sum("income"))
+
+        context["income_array"] = income_array
+        context["total_income"] = total_income["income__sum"]
+
+        return context
+
+
 class ShiftListView(generic.ListView):
     """
     This view displays information about all barista shifts in all cafes for
@@ -130,12 +234,12 @@ class ShiftListView(generic.ListView):
         We override this method to add such data to the context as 'date_range',
         'column_headers' and 'schedule_array'.
 
-        'date_range' - date range for which we can view shifts. Uses DateRangeForm.
-        By default, the 'start_date' is a date seven days ago from the current one,
-        and the 'end_date' is a date seven days ahead from the current one.
-        So, by default, when we go to the page for the first time, we will see
-        a range of shifts for two weeks, where the current date will be in the
-        middle.
+        'date_range' - date range for which we can view shifts. Uses
+        DateRangeForm. By default, the 'start_date' is a date seven days ago
+        from the current one, and the 'end_date' is a date seven days ahead
+        from the current one. So, by default, when we go to the page for the
+        first time, we will see a range of shifts for two weeks, where the
+        current date will be in the middle.
 
         'column_headers' - a list of names of all cafes for adding them into
         the table header. This parameter is passed into template as a list in
@@ -145,7 +249,6 @@ class ShiftListView(generic.ListView):
 
         'schedule_array' - a list of lines for the shift table. Generated by
         schedule_array_creation() function.
-
         """
 
         context = super().get_context_data(**kwargs)
