@@ -109,6 +109,14 @@ class Index(generic.TemplateView):
         return context
 
 
+class CafeListView(generic.ListView):
+    """
+    This view displays list of all cafes from DB.
+    """
+
+    model = Cafe
+
+
 class ShiftListView(generic.ListView):
     """
     This view displays information about all barista shifts in all cafes for
