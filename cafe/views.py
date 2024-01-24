@@ -3,7 +3,7 @@ from typing import Dict, List
 from django.db.models import QuerySet, Sum
 from django.urls import reverse_lazy
 from django.views import generic
-from cafe.forms import DateRangeForm, ShiftForm, IncomeCreateForm
+from cafe.forms import DateRangeForm, ShiftForm, IncomeCreateForm, IncomeUpdateForm
 from cafe.models import Cafe, Barista, Shift, Income, Rate
 
 
@@ -558,6 +558,25 @@ class IncomeCreateView(generic.CreateView):
         form
         """
         return {"cafe": self.request.GET.get("cafe")}
+
+    def get_success_url(self):
+        """
+        Override this method for returning to the previous cafe detail page
+        """
+        return reverse_lazy(
+            "cafe:cafe-detail-view", kwargs={"pk": int(self.request.POST.get("cafe"))}
+        )
+
+
+class IncomeUpdateView(generic.UpdateView):
+    """
+    This view is for updating an income. You only need to update the 'income'
+    field. The cafe and date are selected automatically and transferred
+    from the page of the cafe on which the button 'edit' was clicked.
+    """
+
+    model = Income
+    form_class = IncomeUpdateForm
 
     def get_success_url(self):
         """
