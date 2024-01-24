@@ -162,11 +162,11 @@ class Income(models.Model):
 
         try:
             shift = Shift.objects.get(date=self.date, cafe=self.cafe)
-        except Shift.DoesNotExists:
+        except Shift.DoesNotExist:
             raise ValidationError("No barista on shift!")
         try:
             rate = Rate.objects.get(cafe=self.cafe, barista=shift.barista.id)
-        except Rate.DoesNotExists:
+        except Rate.DoesNotExist:
             raise ValidationError("No barista rates for this cafe!")
         salary = calculation_salary(income=self.income, rate=rate)
         shift.salary = salary
