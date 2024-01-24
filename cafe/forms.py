@@ -1,5 +1,5 @@
 from django import forms
-from cafe.models import Cafe, Barista, Shift
+from cafe.models import Cafe, Barista, Shift, Income
 
 
 class DateRangeForm(forms.Form):
@@ -36,3 +36,25 @@ class ShiftForm(forms.ModelForm):
     class Meta:
         model = Shift
         fields = ["date", "cafe", "barista"]
+
+
+class IncomeCreateForm(forms.ModelForm):
+    """
+    Form for creating an income. You need to select a 'date' and 'income'.
+    'cafe' field is filled in automatically and is hidden
+    """
+
+    date = forms.DateField(
+        label="",
+        widget=forms.DateInput(attrs={"class": "datepicker"}),
+        input_formats=["%Y-%m-%d"],
+    )
+
+    cafe = forms.ModelChoiceField(
+        queryset=Cafe.objects.all(), widget=forms.HiddenInput()
+    )
+    income = forms.IntegerField(required=True)
+
+    class Meta:
+        model = Income
+        fields = "__all__"
