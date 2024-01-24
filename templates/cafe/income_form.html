@@ -7,17 +7,16 @@
 {% endblock %}
 
 {% block content %}
+  <h1>{{ cafe_name }}</h1>
+  <h4>Create income</h4>
 
-	<h1>{{ cafe }}</h1>
+  <form action="" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" class="btn btn-primary">
+  </form>
 
-	<form action="" method="get">
-		{{ date_range }}
-		<p>
-			<input type="submit" value="Show">
-		</p>
-	</form>
-
-	<script>
+  <script>
     $(function () {
       $(".datepicker").datetimepicker({
       format: "Y-m-d",
@@ -26,51 +25,5 @@
       });
     });
   </script>
-
-	<div>
-		<a href="{% url 'cafe:income-create' %}?cafe={{ cafe.id }}" class="btn btn-primary">
-			Add Income
-  	</a>
-	</div>
-
-	<div>
-		<strong>
-			Total income for the specified period: $
-			{% if total_income == None %}
-				0
-			{% else %}
-				{{ total_income }}
-			{% endif %}
-		</strong>
-	</div>
-
-	<div>
-		{% if income_array %}
-			<table>
-				<tr>
-
-					<th>Date</th>
-					<th>Income</th>
-
-				</tr>
-
-				{% for line in income_array %}
-					<tr>
-							<td>
-								{{ line.date }}
-							</td>
-							<td>
-								${{ line.income }}
-							</td>
-					</tr>
-				{% endfor %}
-
-
-			</table>
-
-		{% else %}
-			<p>There are no incomes in database!</p>
-		{% endif %}
-	</div>
 
 {% endblock %}
