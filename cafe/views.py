@@ -361,6 +361,7 @@ class BaristaListView(generic.ListView):
     """
 
     model = Barista
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         """
