@@ -4,7 +4,7 @@ from django.db.models import QuerySet, Sum
 from django.urls import reverse_lazy
 from django.views import generic
 from cafe.forms import DateRangeForm, ShiftForm
-from cafe.models import Cafe, Barista, Shift, Income
+from cafe.models import Cafe, Barista, Shift, Income, Rate
 
 
 def queryset_to_list(incoming_queryset: QuerySet, model: str) -> List[str]:
@@ -29,6 +29,139 @@ def queryset_to_list(incoming_queryset: QuerySet, model: str) -> List[str]:
             returning_list.append(element.full_name)
 
     return returning_list
+
+
+def queryset_to_dict(incoming_queryset: QuerySet, model: str) -> Dict:
+    """
+    The incoming queryset goes through a cycle and creates a dictionary of
+    cafes or baristas, depending on the passed 'model' parameter.
+
+    :param incoming_queryset: incoming queryset.
+
+    :param model: name of model for queryset filtering. "Cafe" or "Barista"
+    is expected.
+
+    :return: Returns a dictionary were the keys are the ID and the values
+    are the cafe names, or barista full_names, depending on the 'model'
+    parameter.
+    """
+
+    returning_dict = {}
+    for element in incoming_queryset:
+        if model == "Cafe":
+            returning_dict[element.id] = element.name
+        if model == "Barista":
+            returning_dict[element.id] = element.full_name
+
+    return returning_dict
+
+
+def rates_dictionary_creation(
+    baristas: QuerySet,
+    barista_rates: QuerySet,
+    cafes_dict: Dict,
+    cafes_list: List,
+) -> Dict:
+    """
+    This function accepts a queryset of barista rates and using other incoming
+    parameters, creates a special dictionary that is needed to fill the table
+    on the page.
+
+    :param baristas: QuerySet of all barista in DB for obtaining information
+
+    :param barista_rates: QuerySet of all barista rates in DB for obtaining
+    information
+
+    :param cafes_dict: A dictionary with information about cafes. In this
+    dictionary, the keys are ID of cafes and their values are cafe names.
+
+    :param cafes_list: List with cafe names.
+
+    :return: The function returns a dictionary. The key is the barista's ID.
+    The value is a list of dictionaries with rates info for each cafe.
+    Every dictionary about rate looks like this:
+    {'cafe_name': 'Park', 'min_wage': 250, 'percent': 6, 'additive': 150}
+
+    Example of returning dict:
+    {1: [{'cafe_name': 'Park', 'min_wage': 250, 'percent': 6, 'additive': 150},
+        {'cafe_name': 'Cofe2Go', 'min_wage': 300, 'percent': 4, 'additive': 50},
+        {'cafe_name': 'Mega', 'min_wage': 300, 'percent': 5, 'additive': 250}],
+    2: [{'cafe_name': 'Park', 'min_wage': None, 'percent': None, 'additive': None},
+        {'cafe_name': 'Cofe2Go', 'min_wage': 6000, 'percent': 8, 'additive': 200},
+        {'cafe_name': 'Mega', 'min_wage': 290, 'percent': 5, 'additive': 240}]}
+    """
+
+    rates_dict = {}
+    rates_data_dict = {}
+
+    # Create a 'rates_dict' dictionary where the key is the barista ID and the
+    # value is a list with dictionaries. Each dictionary has only one key-value
+    # pair. The key is the string 'cafe_name', and the value is a name of the
+    # cafe.
+    # example:
+    # {1: [{'cafe_name': 'Park'}, {'cafe_name': 'Cofe2Go'},
+    #      {'cafe_name': 'Mega'}, {'cafe_name': 'Warm'},
+    #      {'cafe_name': 'Hot Coffee'}],
+    #  2: [{'cafe_name': 'Park'}, {'cafe_name': 'Cofe2Go'},
+    #      {'cafe_name': 'Mega'}, {'cafe_name': 'Warm'},
+    #      {'cafe_name': 'Hot Coffee'}]}
+    for barista in baristas:
+        cafe_rates = []
+        for cafe in cafes_list:
+            cafe_rates.append({"cafe_name": cafe})
+        rates_dict[barista.id] = cafe_rates
+
+    # Create a 'rates_data_dict' dictionary where the key is the barista ID
+    # and the value is a dictionaries. Each key in this dictionary is a name
+    # of cafe, and the value is a dictionary with rates this barista in this
+    # cafe.
+    # example:
+    # {1: {'Park': {'min_wage': 250, 'percent': 6, 'additive': 150},
+    #   'Cofe2Go': {'min_wage': 300, 'percent': 4, 'additive': 50},
+    #      'Mega': {'min_wage': 300, 'percent': 5, 'additive': 250}
+    #  2: {'Cofe2Go': {'min_wage': 600, 'percent': 8, 'additive': 200},
+    #         'Mega': {'min_wage': 290, 'percent': 5, 'additive': 240},
+    #         'Warm': {'min_wage': 500, 'percent': 6, 'additive': 300}}}
+    for rate in barista_rates.values():
+        if rate["barista_id"] not in rates_data_dict:
+            rates_data_dict[rate["barista_id"]] = {
+                cafes_dict[rate["cafe_id"]]: {
+                    "min_wage": rate["min_wage"],
+                    "percent": rate["percent"],
+                    "additive": rate["additive"],
+                }
+            }
+
+        else:
+            rates_data_dict[rate["barista_id"]][cafes_dict[rate["cafe_id"]]] = {
+                "min_wage": rate["min_wage"],
+                "percent": rate["percent"],
+                "additive": rate["additive"],
+            }
+
+    # Update a 'rates_dict' dictionary. Add information about rates in
+    # dictionaries from list for each barista. If no information from DB for
+    # some barista for some cafe, then put 'None' in 'min_wage', 'percent' and
+    # 'additive' values.
+    for barista_id, cafes in rates_dict.items():
+        for cafe in cafes:
+            if cafe["cafe_name"] in rates_data_dict[barista_id]:
+                cafe["min_wage"] = rates_data_dict[barista_id][cafe["cafe_name"]][
+                    "min_wage"
+                ]
+                cafe["percent"] = rates_data_dict[barista_id][cafe["cafe_name"]][
+                    "percent"
+                ]
+                cafe["additive"] = rates_data_dict[barista_id][cafe["cafe_name"]][
+                    "additive"
+                ]
+
+            else:
+                cafe["min_wage"] = None
+                cafe["percent"] = None
+                cafe["additive"] = None
+
+    return rates_dict
 
 
 def schedule_array_creation(
@@ -217,6 +350,49 @@ class CafeDetailView(generic.DetailView):
 
         context["income_array"] = income_array
         context["total_income"] = total_income["income__sum"]
+
+        return context
+
+
+class BaristaListView(generic.ListView):
+    """
+    This view displays information about all baristas including their rates in
+    different cafes.
+    """
+
+    model = Barista
+
+    def get_context_data(self, **kwargs):
+        """
+        We override this method to add such data to the context as 'rates' and
+        'cafe_list'.
+
+        'rates' - Barista rates, which have been converted into a dictionary to
+        reduce the number of requests in DB. In this way, one request is made
+        and the queryset is passed to the rates_dictionary_creation() function
+        that returns a dictionary, which is passed it to the template.
+
+        'cafe_list' - a list of names of all cafes for adding them into
+        the table header. This parameter is passed into template as a list in
+        order to reduce the number of requests in the database. The request is
+        created once, then using the queryset_to_list() function the queryset
+        is converted into a list.
+        """
+
+        context = super().get_context_data(**kwargs)
+        cafes = Cafe.objects.all()
+        all_cafes_dict = queryset_to_dict(cafes, "Cafe")
+        all_cafes_list = queryset_to_list(cafes, "Cafe")
+        all_barista_rates = Rate.objects.select_related("barista", "cafe")
+        all_baristas = Barista.objects.all()
+
+        context["rates"] = rates_dictionary_creation(
+            baristas=all_baristas,
+            barista_rates=all_barista_rates,
+            cafes_dict=all_cafes_dict,
+            cafes_list=all_cafes_list,
+        )
+        context["cafe_list"] = all_cafes_list
 
         return context
 
