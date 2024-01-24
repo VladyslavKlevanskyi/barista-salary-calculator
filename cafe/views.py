@@ -398,6 +398,54 @@ class BaristaListView(generic.ListView):
         return context
 
 
+class BaristaDetailView(generic.DetailView):
+    """
+    This view calculates the barista's salary for the specified date range.
+    """
+
+    model = Barista
+
+    def get_context_data(self, **kwargs):
+        """
+        Override this method to add such data to the context as 'date_range',
+        'shifts' and 'salary'.
+
+        'date_range' - date range for which we can view shifts. Uses
+        DateRangeForm. By default, the 'start_date' is a date seven days ago
+        from the current one, and the 'end_date' is a date seven days ahead
+        from the current one. So, by default, when we go to the page for the
+        first time, we will see a range of shifts for two weeks, where the
+        current date will be in the middle.
+
+        'shifts' - list of incomes for each shift
+
+        'salary' - salary amount for the specified period
+        """
+        context = super().get_context_data(**kwargs)
+
+        start_date = self.request.GET.get(
+            "start_date", str(date.today() - timedelta(7))
+        )
+        end_date = self.request.GET.get("end_date", str(date.today() + timedelta(7)))
+
+        context["date_range"] = DateRangeForm(
+            initial={"start_date": start_date, "end_date": end_date}
+        )
+
+        shifts = Shift.objects.select_related("barista", "cafe").filter(
+            barista__id=context["object"].id,
+            date__gte=start_date,
+            date__lte=end_date,
+        )
+
+        salary = shifts.aggregate(Sum("salary"))
+
+        context["shifts"] = shifts
+        context["salary"] = salary["salary__sum"]
+
+        return context
+
+
 class ShiftListView(generic.ListView):
     """
     This view displays information about all barista shifts in all cafes for
