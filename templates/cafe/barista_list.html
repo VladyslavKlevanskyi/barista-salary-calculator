@@ -18,7 +18,7 @@
 			{% for barista in  barista_list %}
 				<tr>
 					<td>
-						<a href="#"><strong>{{ barista }}</strong></a>
+						<a href="{% url 'cafe:barista-detail-view' pk=barista.id %}"><strong>{{ barista }}</strong></a>
 					</td>
 						{% for cafe in rates|keyvalue:barista.id %}
 							<td>
