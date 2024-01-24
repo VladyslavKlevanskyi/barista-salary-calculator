@@ -61,16 +61,23 @@
 							</td>
 							<td>
 								${{ line.income }}
+								{% if line.id != None %}
+									<span style="font-size: 70%">
+										<a href="{% url 'cafe:income-update' pk=line.id %}">
+											edit
+										</a>
+									</span>
+								{% endif %}
 							</td>
 					</tr>
 				{% endfor %}
-
 
 			</table>
 
 		{% else %}
 			<p>There are no incomes in database!</p>
 		{% endif %}
+
 	</div>
 
 {% endblock %}

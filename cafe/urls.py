@@ -10,6 +10,7 @@ from cafe.views import (
     ShiftUpdateView,
     ShiftDeleteView,
     IncomeCreateView,
+    IncomeUpdateView,
 )
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path("shifts/<int:pk>/update/", ShiftUpdateView.as_view(), name="shift-update"),
     path("shifts/<int:pk>/delete/", ShiftDeleteView.as_view(), name="shift-delete"),
     path("incomes/create/", IncomeCreateView.as_view(), name="income-create"),
+    path("incomes/<int:pk>/update/", IncomeUpdateView.as_view(), name="income-update"),
 ]
 
 app_name = "cafe"

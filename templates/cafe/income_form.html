@@ -7,8 +7,13 @@
 {% endblock %}
 
 {% block content %}
-  <h1>{{ cafe_name }}</h1>
-  <h4>Create income</h4>
+  {% if object %}
+    <h1>{{ income.cafe }}</h1>
+    <h4>Update income for {{ income.date }}</h4>
+  {% else %}
+    <h1>{{ cafe_name }}</h1>
+    <h4>Create income</h4>
+  {% endif %}
 
   <form action="" method="post" novalidate>
     {% csrf_token %}
