@@ -3,7 +3,7 @@ from typing import Dict, List
 from django.db.models import QuerySet, Sum
 from django.urls import reverse_lazy
 from django.views import generic
-from cafe.forms import DateRangeForm, ShiftForm
+from cafe.forms import DateRangeForm, ShiftForm, IncomeCreateForm
 from cafe.models import Cafe, Barista, Shift, Income, Rate
 
 
@@ -530,3 +530,39 @@ class ShiftDeleteView(generic.DeleteView):
 
     model = Shift
     success_url = reverse_lazy("cafe:shift-list-view")
+
+
+class IncomeCreateView(generic.CreateView):
+    """
+    This view is for creating an income instance. You only need to enter the
+    'date' and 'income'. The cafe is selected automatically and transferred
+    from the page of the cafe on which the button 'Add income' was clicked.
+    """
+
+    model = Income
+    form_class = IncomeCreateForm
+
+    def get_context_data(self, **kwargs):
+        """
+        Override this method to add such data to the context as 'cafe_name'.
+        """
+
+        context = super().get_context_data(**kwargs)
+        cafe_name = Cafe.objects.get(id=self.request.GET.get("cafe"))
+        context["cafe_name"] = cafe_name
+        return context
+
+    def get_initial(self):
+        """
+        Override this method for sending cafe's ID as 'cafe' parameter to the
+        form
+        """
+        return {"cafe": self.request.GET.get("cafe")}
+
+    def get_success_url(self):
+        """
+        Override this method for returning to the previous cafe detail page
+        """
+        return reverse_lazy(
+            "cafe:cafe-detail-view", kwargs={"pk": int(self.request.POST.get("cafe"))}
+        )
