@@ -110,17 +110,47 @@ class Shift(models.Model):
         Barista, on_delete=models.CASCADE, blank=False, related_name="shifts"
     )
 
-    def clean(self):
-        """
-        This method checks whether the barista is busy at another cafe that day
-        """
+    @staticmethod
+    def validate_rate(cafe, barista):
+        try:
+            Rate.objects.get(cafe=cafe, barista=barista)
+        except Rate.DoesNotExist:
+            raise ValidationError(f"Barista {barista} has no rate for '{cafe}' cafe!")
 
-        shift = Shift.objects.filter(date=self.date, barista=self.barista)
+    @staticmethod
+    def validate_shift(date, barista):
+        shift = Shift.objects.filter(date=date, barista_id=barista)
         if len(shift) != 0:
             raise ValidationError(
-                f"On {self.date}, barista {self.barista}"
-                f" is already busy in the another cafe."
+                {
+                    "barista": f"On {date}, barista {barista}"
+                    f" is already busy in the another cafe."
+                }
             )
+
+    @staticmethod
+    def income_calculation(shift, date, cafe):
+        rate = Rate.objects.get(cafe=cafe, barista=shift.barista.id)
+        try:
+            income = Income.objects.get(date=date, cafe=cafe)
+            shift.salary = calculation_salary(income=income.income, rate=rate)
+        except Income.DoesNotExist:
+            print("No INCOME for this date", Income.DoesNotExist)
+
+    def clean(self):
+        Shift.validate_rate(self.cafe, self.barista)
+        Shift.validate_shift(date=self.date, barista=self.barista)
+        Shift.income_calculation(self, self.date, self.cafe)
+
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Shift, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return f"{self.date} | Cafe: {self.cafe} | Barista: {self.barista}"
