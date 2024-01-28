@@ -186,24 +186,42 @@ class Income(models.Model):
         Cafe, on_delete=models.DO_NOTHING, blank=False, related_name="incomes"
     )
 
-    def clean(self):
-        """
-        This method, using the calculation_salary() function, calculates the
-        salary of a barista in a specific cafe for one day and enters it into
-        the 'salary' field of the 'Shift' model
-        """
+    @staticmethod
+    def shift_validation(date, cafe):
+        try:
+            Shift.objects.get(date=date, cafe=cafe)
+        except Shift.DoesNotExist as ex:
+            raise ValidationError(
+                {
+                    "cafe": f"There is no barista on shift at the '{cafe}' Cafe on {date}!"
+                }
+            )
 
-        try:
-            shift = Shift.objects.get(date=self.date, cafe=self.cafe)
-        except Shift.DoesNotExist:
-            raise ValidationError("No barista on shift!")
-        try:
-            rate = Rate.objects.get(cafe=self.cafe, barista=shift.barista.id)
-        except Rate.DoesNotExist:
-            raise ValidationError("No barista rates for this cafe!")
-        salary = calculation_salary(income=self.income, rate=rate)
-        shift.salary = salary
-        shift.save()
+    @staticmethod
+    def calculate_salary(cafe, income, date):
+        shift = Shift.objects.get(date=date, cafe=cafe)
+        rate = Rate.objects.get(cafe=cafe, barista=shift.barista)
+        salary = calculation_salary(income=income, rate=rate)
+        shifts = Shift.objects.filter(id=shift.id)
+        shifts.update(salary=salary)
+
+    def clean(self):
+        Income.shift_validation(date=self.date, cafe=self.cafe)
+        shift = Shift.objects.get(date=self.date, cafe=self.cafe)
+        Shift.validate_rate(cafe=self.cafe, barista=shift.barista)
+        Income.calculate_salary(cafe=self.cafe, income=self.income, date=self.date)
+
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Income, self).save(
+            force_insert, force_update, using, update_fields
+        )
 
     def __str__(self):
         return f"{self.date}, Cafe: {self.cafe}, Income - ${self.income}"
