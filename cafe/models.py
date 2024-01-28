@@ -153,7 +153,10 @@ class Shift(models.Model):
         return super(Shift, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return f"{self.date} | Cafe: {self.cafe} | Barista: {self.barista}"
+        return (
+            f"{self.date} | Cafe: {self.cafe} | Barista: {self.barista} "
+            f"| Salary: {self.salary}"
+        )
 
     class Meta:
         unique_together = ("date", "cafe")
