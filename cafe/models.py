@@ -1,24 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-
-
-def calculation_salary(income: int, rate: "Rate") -> int:
-    """
-    :param income: - Cafe income per day
-    :param rate: - Barista's rate in this cafe
-    :return: - If the income is less than min_wage, then the function
-    returns min_wage. If the income is greater than min_wage, then the function
-    returns the result of the calculation using the formula:
-
-    income / 100 * rate.percent + rate.additive
-
-    We don't need much precision; we can round the value to an integer.
-    """
-    if income < rate.min_wage:
-        return int(rate.min_wage)
-    else:
-        salary = income / 100 * rate.percent + rate.additive
-        return int(salary)
+from cafe.utils import calculation_salary
 
 
 class Cafe(models.Model):
