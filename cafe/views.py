@@ -288,13 +288,16 @@ class ShiftDeleteView(generic.DeleteView):
     success_url = reverse_lazy("cafe:shift-list-view")
 
 
-class IncomeCreateView(generic.CreateView):
+class IncomeCreateView(GroupRequiredMixin, generic.CreateView):
     """
     This view is for creating an income instance. You only need to enter the
     'date' and 'income'. The cafe is selected automatically and transferred
     from the page of the cafe on which the button 'Add income' was clicked.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Income
     form_class = IncomeCreateForm
 
@@ -325,13 +328,16 @@ class IncomeCreateView(generic.CreateView):
         )
 
 
-class IncomeUpdateView(generic.UpdateView):
+class IncomeUpdateView(GroupRequiredMixin, generic.UpdateView):
     """
     This view is for updating an income. You only need to update the 'income'
     field. The cafe and date are selected automatically and transferred
     from the page of the cafe on which the button 'edit' was clicked.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Income
     form_class = IncomeUpdateForm
 
