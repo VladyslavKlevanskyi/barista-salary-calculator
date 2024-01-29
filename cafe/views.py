@@ -40,20 +40,26 @@ class Index(LoginRequiredMixin, generic.TemplateView):
         return context
 
 
-class CafeListView(generic.ListView):
+class CafeListView(GroupRequiredMixin, generic.ListView):
     """
     This view displays list of all cafes from DB.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Cafe
 
 
-class CafeDetailView(generic.DetailView):
+class CafeDetailView(GroupRequiredMixin, generic.DetailView):
     """
     This view displays information about income a specified period for one
     cafe.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Cafe
 
     def get_context_data(self, **kwargs):
