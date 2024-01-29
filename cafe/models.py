@@ -142,8 +142,7 @@ class Shift(models.Model):
 
     def __str__(self):
         return (
-            f"{self.date} | Cafe: {self.cafe} | Barista: {self.barista} "
-            f"| Salary: {self.salary}"
+            f"{self.date} | Cafe: {self.cafe} | Barista: {self.barista}"
         )
 
     class Meta:

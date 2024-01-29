@@ -44,7 +44,7 @@ class ShiftModelTests(TestCase):
         self.assertEqual(
             str(self.shift),
             f"{self.date} | Cafe: {self.cafe1} | "
-            f"Barista: {self.barista} | Salary: None",
+            f"Barista: {self.barista}",
         )
 
     def test_create_shift_if_barista_is_busy(self):
