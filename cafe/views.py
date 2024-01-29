@@ -110,12 +110,15 @@ class CafeDetailView(GroupRequiredMixin, generic.DetailView):
         return context
 
 
-class BaristaListView(generic.ListView):
+class BaristaListView(GroupRequiredMixin, generic.ListView):
     """
     This view displays information about all baristas including their rates in
     different cafes.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Barista
     paginate_by = 10
 
@@ -154,11 +157,14 @@ class BaristaListView(generic.ListView):
         return context
 
 
-class BaristaDetailView(generic.DetailView):
+class BaristaDetailView(GroupRequiredMixin, generic.DetailView):
     """
     This view calculates the barista's salary for the specified date range.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Barista
 
     def get_context_data(self, **kwargs):
