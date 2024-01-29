@@ -1,8 +1,17 @@
 <ul class="sidebar-nav list-group">
+	{% if user.is_authenticated %}
+    <li class="list-group-item">User: {{ user.first_name }} {{ user.last_name }}</li>
+    <li class="list-group-item"><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+  {% else %}
+    <li class="list-group-item"><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+  {% endif %}
 
+  <br>
+
+  {% if user.is_authenticated %}
 	<li class="list-group-item"><a href="{% url 'cafe:index' %}">Home</a></li>
 	<li class="list-group-item"><a href="{% url 'cafe:shift-list-view' %}">Shifts</a></li>
   <li class="list-group-item"><a href="{% url 'cafe:barista-list-view' %}">Barista salary</a></li>
   <li class="list-group-item"><a href="{% url 'cafe:cafe-list-view' %}">Cafes Income</a></li>
-
+  {% endif %}
 </ul>

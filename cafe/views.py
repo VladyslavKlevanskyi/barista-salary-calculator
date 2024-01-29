@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from typing import Dict
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views import generic
@@ -17,9 +18,10 @@ from cafe.utils import (
     rates_dictionary_creation,
     schedule_array_creation,
 )
+from user.mixins import GroupRequiredMixin
 
 
-class Index(generic.TemplateView):
+class Index(LoginRequiredMixin, generic.TemplateView):
     """
     Index page displaying the total number of cafes and baristas.
     """
