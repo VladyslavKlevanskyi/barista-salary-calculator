@@ -13,8 +13,10 @@
 	<div>
 
 		<form action="" method="get">
-			{{ date_range }}
-			<p><input type="submit" value="Show"></p>
+			<div class="form-inline">
+				{{ date_range }}
+			</div>
+			<p><input type="submit" value="Show" class="btn btn-primary"></p>
 		</form>
 
 		<script>
@@ -31,7 +33,7 @@
 
 	{% if user.is_staff %}
 		<div>
-			<a href="{% url 'cafe:shift-create' %}" class="btn btn-primary">
+			<a href="{% url 'cafe:shift-create' %}" class="btn btn-success">
 				Add new Shift
 			</a>
 		</div>

@@ -11,10 +11,10 @@
 	<h1>{{ cafe }}</h1>
 
 	<form action="" method="get">
-		{{ date_range }}
-		<p>
-			<input type="submit" value="Show">
-		</p>
+		<div class="form-inline">
+			{{ date_range }}
+		</div>
+		<p><input type="submit" value="Show" class="btn btn-primary"></p>
 	</form>
 
 	<script>
@@ -28,7 +28,7 @@
   </script>
 
 	<div>
-		<a href="{% url 'cafe:income-create' %}?cafe={{ cafe.id }}" class="btn btn-primary">
+		<a href="{% url 'cafe:income-create' %}?cafe={{ cafe.id }}" class="btn btn-success">
 			Add Income
   	</a>
 	</div>
