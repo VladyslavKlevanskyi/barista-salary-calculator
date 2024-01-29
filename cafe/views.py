@@ -3,7 +3,12 @@ from typing import Dict
 from django.db.models import Sum
 from django.urls import reverse_lazy
 from django.views import generic
-from cafe.forms import DateRangeForm, ShiftForm, IncomeCreateForm, IncomeUpdateForm
+from cafe.forms import (
+    DateRangeForm,
+    ShiftForm,
+    IncomeCreateForm,
+    IncomeUpdateForm
+)
 from cafe.models import Cafe, Barista, Shift, Income, Rate
 from cafe.utils import (
     income_array_creation,
@@ -73,7 +78,10 @@ class CafeDetailView(generic.DetailView):
         start_date = self.request.GET.get(
             "start_date", str(date.today() - timedelta(7))
         )
-        end_date = self.request.GET.get("end_date", str(date.today() + timedelta(7)))
+        end_date = self.request.GET.get(
+            "end_date",
+            str(date.today() + timedelta(7))
+        )
 
         context["date_range"] = DateRangeForm(
             initial={"start_date": start_date, "end_date": end_date}
@@ -166,7 +174,10 @@ class BaristaDetailView(generic.DetailView):
         start_date = self.request.GET.get(
             "start_date", str(date.today() - timedelta(7))
         )
-        end_date = self.request.GET.get("end_date", str(date.today() + timedelta(7)))
+        end_date = self.request.GET.get(
+            "end_date",
+            str(date.today() + timedelta(7))
+        )
 
         context["date_range"] = DateRangeForm(
             initial={"start_date": start_date, "end_date": end_date}
@@ -196,8 +207,8 @@ class ShiftListView(generic.ListView):
 
     def get_context_data(self, **kwargs) -> Dict:
         """
-        We override this method to add such data to the context as 'date_range',
-        'column_headers' and 'schedule_array'.
+        We override this method to add such data to the context as
+        'date_range', 'column_headers' and 'schedule_array'.
 
         'date_range' - date range for which we can view shifts. Uses
         DateRangeForm. By default, the 'start_date' is a date seven days ago
@@ -222,7 +233,10 @@ class ShiftListView(generic.ListView):
         start_date = self.request.GET.get(
             "start_date", str(date.today() - timedelta(7))
         )
-        end_date = self.request.GET.get("end_date", str(date.today() + timedelta(7)))
+        end_date = self.request.GET.get(
+            "end_date",
+            str(date.today() + timedelta(7))
+        )
 
         context["date_range"] = DateRangeForm(
             initial={"start_date": start_date, "end_date": end_date}
@@ -304,7 +318,8 @@ class IncomeCreateView(generic.CreateView):
         Override this method for returning to the previous cafe detail page
         """
         return reverse_lazy(
-            "cafe:cafe-detail-view", kwargs={"pk": int(self.request.POST.get("cafe"))}
+            "cafe:cafe-detail-view",
+            kwargs={"pk": int(self.request.POST.get("cafe"))}
         )
 
 
@@ -323,5 +338,6 @@ class IncomeUpdateView(generic.UpdateView):
         Override this method for returning to the previous cafe detail page
         """
         return reverse_lazy(
-            "cafe:cafe-detail-view", kwargs={"pk": int(self.request.POST.get("cafe"))}
+            "cafe:cafe-detail-view",
+            kwargs={"pk": int(self.request.POST.get("cafe"))}
         )

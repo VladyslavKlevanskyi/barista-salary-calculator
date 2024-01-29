@@ -97,7 +97,8 @@ class Shift(models.Model):
         try:
             Rate.objects.get(cafe=cafe, barista=barista)
         except Rate.DoesNotExist:
-            raise ValidationError(f"Barista {barista} has no rate for '{cafe}' cafe!")
+            raise ValidationError(f"Barista {barista} "
+                                  f"has no rate for '{cafe}' cafe!")
 
     @staticmethod
     def validate_shift(date, barista):
@@ -132,7 +133,12 @@ class Shift(models.Model):
         update_fields=None,
     ):
         self.full_clean()
-        return super(Shift, self).save(force_insert, force_update, using, update_fields)
+        return super(Shift, self).save(
+            force_insert,
+            force_update,
+            using,
+            update_fields
+        )
 
     def __str__(self):
         return (
@@ -172,10 +178,11 @@ class Income(models.Model):
     def shift_validation(date, cafe):
         try:
             Shift.objects.get(date=date, cafe=cafe)
-        except Shift.DoesNotExist as ex:
+        except Shift.DoesNotExist:
             raise ValidationError(
                 {
-                    "cafe": f"There is no barista on shift at the '{cafe}' Cafe on {date}!"
+                    "cafe": f"There is no barista on shift "
+                            f"at the '{cafe}' Cafe on {date}!"
                 }
             )
 
@@ -191,7 +198,11 @@ class Income(models.Model):
         Income.shift_validation(date=self.date, cafe=self.cafe)
         shift = Shift.objects.get(date=self.date, cafe=self.cafe)
         Shift.validate_rate(cafe=self.cafe, barista=shift.barista)
-        Income.calculate_salary(cafe=self.cafe, income=self.income, date=self.date)
+        Income.calculate_salary(
+            cafe=self.cafe,
+            income=self.income,
+            date=self.date
+        )
 
     def save(
         self,

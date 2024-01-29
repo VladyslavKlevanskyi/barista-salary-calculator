@@ -100,12 +100,12 @@ def rates_dictionary_creation(
     {'cafe_name': 'Park', 'min_wage': 250, 'percent': 6, 'additive': 150}
 
     Example of returning dict:
-    {1: [{'cafe_name': 'Park', 'min_wage': 250, 'percent': 6, 'additive': 150},
-        {'cafe_name': 'Cofe2Go', 'min_wage': 300, 'percent': 4, 'additive': 50},
-        {'cafe_name': 'Mega', 'min_wage': 300, 'percent': 5, 'additive': 250}],
-    2: [{'cafe_name': 'Park', 'min_wage': None, 'percent': None, 'additive': None},
-        {'cafe_name': 'Cofe2Go', 'min_wage': 6000, 'percent': 8, 'additive': 200},
-        {'cafe_name': 'Mega', 'min_wage': 290, 'percent': 5, 'additive': 240}]}
+    {1: [{'cafe_name':'Park', 'min_wage': 250, 'percent': 6, 'additive': 150},
+        {'cafe_name':'Cofe2Go', 'min_wage': 300, 'percent': 4, 'additive': 50},
+        {'cafe_name':'Mega', 'min_wage': 300, 'percent': 5, 'additive': 250}],
+    2: [{'cafe_name':'Park', 'min_wage':None, 'percent':None, 'additive':None},
+        {'cafe_name':'Cofe2Go', 'min_wage':6000, 'percent': 8, 'additive':200},
+        {'cafe_name':'Mega', 'min_wage': 290, 'percent': 5, 'additive': 240}]}
     """
 
     rates_dict = {}
@@ -150,7 +150,8 @@ def rates_dictionary_creation(
             }
 
         else:
-            rates_data_dict[rate["barista_id"]][cafes_dict[rate["cafe_id"]]] = {
+            rates_data_dict[
+                rate["barista_id"]][cafes_dict[rate["cafe_id"]]] = {
                 "min_wage": rate["min_wage"],
                 "percent": rate["percent"],
                 "additive": rate["additive"],
@@ -163,15 +164,12 @@ def rates_dictionary_creation(
     for barista_id, cafes in rates_dict.items():
         for cafe in cafes:
             if cafe["cafe_name"] in rates_data_dict[barista_id]:
-                cafe["min_wage"] = rates_data_dict[barista_id][cafe["cafe_name"]][
-                    "min_wage"
-                ]
-                cafe["percent"] = rates_data_dict[barista_id][cafe["cafe_name"]][
-                    "percent"
-                ]
-                cafe["additive"] = rates_data_dict[barista_id][cafe["cafe_name"]][
-                    "additive"
-                ]
+                cafe["min_wage"] = rates_data_dict[barista_id][cafe[
+                    "cafe_name"]]["min_wage"]
+                cafe["percent"] = rates_data_dict[barista_id][cafe[
+                    "cafe_name"]]["percent"]
+                cafe["additive"] = rates_data_dict[barista_id][cafe[
+                    "cafe_name"]]["additive"]
 
             else:
                 cafe["min_wage"] = None
@@ -199,12 +197,14 @@ def schedule_array_creation(
     number of cafes in the database plus 1. The first dictionary is a key-value
     pair. The key is a string: 'date', and the value is the date to which the
     information in this value of the first list belongs
-    (example: {'date': '2024-01-15'}). The following dictionaries are dictionaries
-    with information about the shift, if it exists, for a specific date for
-    each cafe. (example: {'name': 'Max Smith', 'shift_id': 9, 'barista_id': 1})
+    (example: {'date': '2024-01-15'}). The following dictionaries are
+    dictionaries with information about the shift, if it exists, for a specific
+    date for each cafe.
+    (example: {'name': 'Max Smith', 'shift_id': 9, 'barista_id': 1})
 
     Example of returning list:
-    [[{'date': '2024-01-15'}, {'name': 'Max Smith', 'shift_id': 9, 'barista_id': 1}, '-=-', '-=-'],
+    [[{'date': '2024-01-15'},
+     {'name': 'Max Smith', 'shift_id': 9, 'barista_id': 1}, '-=-', '-=-'],
     [{'date': '2024-01-16'}, '-=-', '-=-']]
     """
 
@@ -279,7 +279,10 @@ def income_array_creation(
     # Go through the cycle through the incomes and fill the 'income_dict'
     # dictionary with information form DB.
     for income in incomes:
-        income_dict[str(income.date)] = {"income": income.income, "id": income.id}
+        income_dict[str(income.date)] = {
+            "income": income.income,
+            "id": income.id
+        }
 
     # Convert the dictionary into a list of the desired view
     for day, income in income_dict.items():

@@ -43,8 +43,8 @@ class ShiftModelTests(TestCase):
 
         self.assertEqual(
             str(self.shift),
-            f"{self.date} | Cafe: {self.cafe1} | Barista: {self.barista} "
-            f"| Salary: None",
+            f"{self.date} | Cafe: {self.cafe1} | "
+            f"Barista: {self.barista} | Salary: None",
         )
 
     def test_create_shift_if_barista_is_busy(self):
@@ -63,18 +63,21 @@ class ShiftModelTests(TestCase):
 
     def test_create_shift_for_barista_without_rates(self):
         """
-        Impossible to create a shift with a barista who has no rete in this cafe
+        Impossible to create a shift with a barista who has no rete in this
+        cafe
         """
         barista = Barista.objects.create(full_name=BARISTA2_NAME)
 
         with self.assertRaisesMessage(
-            ValidationError, f"Barista {barista} has no rate for '{self.cafe1}' cafe!"
+            ValidationError, f"Barista {barista} has"
+                             f" no rate for '{self.cafe1}' cafe!"
         ):
             Shift.objects.create(date=DATE2, cafe=self.cafe1, barista=barista)
 
     def test_calculation_salary(self):
         """
-        The test is that the salary is calculated if income exists in this cafe on that day.
+        The test is that the salary is calculated if income exists in this cafe
+        on that day.
         """
         # Create new Income for existing shift. We must do this for the
         # existing shift, otherwise the income will not be created.
@@ -115,7 +118,11 @@ class IncomeModelTests(TestCase):
         self.shift = Shift.objects.create(
             date=self.date, cafe=self.cafe, barista=self.barista
         )
-        self.income = Income.objects.create(date=self.date, cafe=self.cafe, income=5555)
+        self.income = Income.objects.create(
+            date=self.date,
+            cafe=self.cafe,
+            income=5555
+        )
 
     def test_str_in_income_model(self):
         """
@@ -124,7 +131,8 @@ class IncomeModelTests(TestCase):
 
         self.assertEqual(
             str(self.income),
-            f"{self.date}, Cafe: {self.cafe}, Income - ${self.income.income}",
+            f"{self.date}, Cafe: {self.cafe}, "
+            f"Income - ${self.income.income}",
         )
 
     def test_create_income_if_there_is_no_shift(self):
@@ -136,7 +144,8 @@ class IncomeModelTests(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"There is no barista on shift at the " f"'{self.cafe}' Cafe on {date}!",
+            f"There is no barista on shift at the "
+            f"'{self.cafe}' Cafe on {date}!",
         ):
             Income.objects.create(date=DATE2, cafe=self.cafe, income=5555)
 
@@ -157,18 +166,24 @@ class IncomeModelTests(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"Barista {self.barista} has no rate for '{self.cafe}' cafe!",
+            f"Barista {self.barista} "
+            f"has no rate for '{self.cafe}' cafe!",
         ):
             Income.objects.create(date=date, cafe=self.cafe, income=5555)
 
     def test_calculation_salary(self):
         """
-        The test is that the salary is calculated if shift exists in this cafe on that day.
+        The test is that the salary is calculated if shift exists in this cafe
+        on that day.
         """
 
         # Create shift.
         date = DATE2
-        shift = Shift.objects.create(date=date, cafe=self.cafe, barista=self.barista)
+        shift = Shift.objects.create(
+            date=date,
+            cafe=self.cafe,
+            barista=self.barista
+        )
 
         # Create income
         Income.objects.create(date=date, cafe=self.cafe, income=6870)
