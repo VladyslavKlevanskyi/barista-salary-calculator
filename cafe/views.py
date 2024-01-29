@@ -24,6 +24,8 @@ from user.mixins import GroupRequiredMixin
 class Index(LoginRequiredMixin, generic.TemplateView):
     """
     Index page displaying the total number of cafes and baristas.
+
+    Only logged in users have access to this view.
     """
 
     template_name = "cafe/index.html"
@@ -211,10 +213,12 @@ class BaristaDetailView(GroupRequiredMixin, generic.DetailView):
         return context
 
 
-class ShiftListView(generic.ListView):
+class ShiftListView(LoginRequiredMixin, generic.ListView):
     """
     This view displays information about all barista shifts in all cafes for
     the selected period.
+
+    Only logged in users have access to this view.
     """
 
     model = Shift
@@ -271,31 +275,40 @@ class ShiftListView(generic.ListView):
         return context
 
 
-class ShiftCreateView(generic.CreateView):
+class ShiftCreateView(GroupRequiredMixin, generic.CreateView):
     """
     This view creates a shift using a 'ShiftForm' form.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Shift
     form_class = ShiftForm
     success_url = reverse_lazy("cafe:shift-list-view")
 
 
-class ShiftUpdateView(generic.UpdateView):
+class ShiftUpdateView(GroupRequiredMixin, generic.UpdateView):
     """
     This view updates a shift using a 'ShiftForm' form.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Shift
     form_class = ShiftForm
     success_url = reverse_lazy("cafe:shift-list-view")
 
 
-class ShiftDeleteView(generic.DeleteView):
+class ShiftDeleteView(GroupRequiredMixin, generic.DeleteView):
     """
     This view deletes a shift using.
+
+    Only users belonging to the "admin" group have access to this view.
     """
 
+    group_required = ["admin"]
     model = Shift
     success_url = reverse_lazy("cafe:shift-list-view")
 
