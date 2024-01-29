@@ -9,9 +9,11 @@
   <br>
 
   {% if user.is_authenticated %}
-	<li class="list-group-item"><a href="{% url 'cafe:index' %}">Home</a></li>
-	<li class="list-group-item"><a href="{% url 'cafe:shift-list-view' %}">Shifts</a></li>
-  <li class="list-group-item"><a href="{% url 'cafe:barista-list-view' %}">Barista salary</a></li>
-  <li class="list-group-item"><a href="{% url 'cafe:cafe-list-view' %}">Cafes Income</a></li>
+    <li class="list-group-item"><a href="{% url 'cafe:index' %}">Home</a></li>
+    <li class="list-group-item"><a href="{% url 'cafe:shift-list-view' %}">Shifts</a></li>
+    {% if user.is_staff %}
+      <li class="list-group-item"><a href="{% url 'cafe:barista-list-view' %}">Barista salary</a></li>
+      <li class="list-group-item"><a href="{% url 'cafe:cafe-list-view' %}">Cafes Income</a></li>
+    {% endif %}
   {% endif %}
 </ul>
