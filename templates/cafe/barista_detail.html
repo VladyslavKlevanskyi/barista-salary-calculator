@@ -25,13 +25,13 @@
     });
   </script>
 
-	<p><strong>SALARY: ${{ salary }}</strong></p>
+	<h5>SALARY: <strong>$ {{ salary }}</strong></h5>
 
 	<div>
 		<ul>
     	{% for shift in shifts %}
 				<li>
-					<p>{{ shift.date }} - ${{ shift.salary }}</p>
+					<p>{{ shift.date }} - <strong>${{ shift.salary }}</strong> [Cafe: {{ shift.cafe }}]</p>
 				</li>
 			{% endfor %}
 		</ul>
