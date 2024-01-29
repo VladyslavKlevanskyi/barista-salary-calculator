@@ -29,11 +29,13 @@
 
 	</div>
 
+	{% if user.is_staff %}
 		<div>
 			<a href="{% url 'cafe:shift-create' %}" class="btn btn-primary">
 				Add new Shift
 			</a>
 		</div>
+	{% endif %}
 
 	<div>
 		{% if shift_list %}
@@ -54,7 +56,7 @@
 							<td>
 								{{ item.date }}
 								{{ item.name }}
-
+								{% if user.is_staff %}
 									{% if item.shift_id %}
 										<span style="font-size: 70%">
 											<a href="{% url 'cafe:shift-update' pk=item.shift_id %}">
@@ -66,7 +68,7 @@
 											</a>
 										</span>
 										{% endif %}
-
+									{% endif %}
 							</td>
 						{% endfor %}
 					</tr>
