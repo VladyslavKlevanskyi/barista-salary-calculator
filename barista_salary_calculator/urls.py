@@ -9,4 +9,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("", include("cafe.urls", namespace="cafe")),
+    path("__debug__/", include("debug_toolbar.urls"))
 ]
