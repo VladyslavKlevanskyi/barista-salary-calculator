@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+
+from django.urls import reverse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -75,6 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "barista_salary_calculator.wsgi.application"
 
 AUTH_USER_MODEL = "user.User"
+
+LOGIN_REDIRECT_URL = "cafe:index"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
