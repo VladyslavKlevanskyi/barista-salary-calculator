@@ -2,13 +2,31 @@ from datetime import date as day
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from cafe.models import Cafe, Barista, Shift, Rate, Income
+from cafe.utils import calculation_salary
 
-DATE1 = day(year=2022, month=2, day=24)
-DATE2 = day(year=2023, month=2, day=24)
+DATE1 = day(year=2022, month=2, day=25)
+DATE2 = day(year=2023, month=3, day=26)
+DATE3 = day(year=2024, month=4, day=27)
 CAFE1_NAME = "SuperCafe"
 CAFE2_NAME = "MegaCafe"
 BARISTA1_NAME = "John Smith"
 BARISTA2_NAME = "Mr Martin"
+MIN_WAGE1 = 600
+PERCENT1 = 5
+ADDITIVE1 = 400
+MIN_WAGE2 = 500
+PERCENT2 = 4
+ADDITIVE2 = 300
+INCOME1 = 5555
+INCOME2 = 333
+SALARY1 = calculation_salary(
+    income=INCOME1,
+    rate={"min_wage": MIN_WAGE1, "percent": PERCENT1, "additive": ADDITIVE1}
+)
+SALARY2 = calculation_salary(
+    income=INCOME2,
+    rate={"min_wage": MIN_WAGE1, "percent": PERCENT1, "additive": ADDITIVE1}
+)
 
 
 class ShiftModelTests(TestCase):
@@ -18,16 +36,16 @@ class ShiftModelTests(TestCase):
         self.cafe2 = Cafe.objects.create(name=CAFE2_NAME)
         self.barista = Barista.objects.create(full_name=BARISTA1_NAME)
         self.rate1 = Rate.objects.create(
-            min_wage=500,
-            percent=5,
-            additive=300,
+            min_wage=MIN_WAGE1,
+            percent=PERCENT1,
+            additive=ADDITIVE1,
             cafe=self.cafe1,
             barista=self.barista,
         )
         self.rate2 = Rate.objects.create(
-            min_wage=400,
-            percent=4,
-            additive=200,
+            min_wage=MIN_WAGE2,
+            percent=PERCENT2,
+            additive=ADDITIVE2,
             cafe=self.cafe2,
             barista=self.barista,
         )
@@ -81,7 +99,7 @@ class ShiftModelTests(TestCase):
         """
         # Create new Income for existing shift. We must do this for the
         # existing shift, otherwise the income will not be created.
-        Income.objects.create(date=self.date, cafe=self.cafe1, income=5870)
+        Income.objects.create(date=self.date, cafe=self.cafe1, income=INCOME1)
 
         # Get existing shift
         existing_shift = Shift.objects.get(date=self.date, cafe=self.cafe1)
@@ -97,7 +115,7 @@ class ShiftModelTests(TestCase):
             date=self.date, cafe=self.cafe1, barista=self.barista
         )
 
-        self.assertEqual(shift_new.salary, 593)
+        self.assertEqual(shift_new.salary, SALARY1)
         # Different IDs show that the old shift was deleted and a new one was
         # created
         self.assertNotEqual(existing_shift_id, shift_new.id)
@@ -109,9 +127,9 @@ class IncomeModelTests(TestCase):
         self.cafe = Cafe.objects.create(name=CAFE1_NAME)
         self.barista = Barista.objects.create(full_name=BARISTA1_NAME)
         self.rate = Rate.objects.create(
-            min_wage=500,
-            percent=5,
-            additive=300,
+            min_wage=MIN_WAGE1,
+            percent=PERCENT1,
+            additive=ADDITIVE1,
             cafe=self.cafe,
             barista=self.barista,
         )
@@ -121,7 +139,7 @@ class IncomeModelTests(TestCase):
         self.income = Income.objects.create(
             date=self.date,
             cafe=self.cafe,
-            income=5555
+            income=INCOME1
         )
 
     def test_str_in_income_model(self):
@@ -147,7 +165,7 @@ class IncomeModelTests(TestCase):
             f"There is no barista on shift at the "
             f"'{self.cafe}' Cafe on {date}!",
         ):
-            Income.objects.create(date=DATE2, cafe=self.cafe, income=5555)
+            Income.objects.create(date=DATE2, cafe=self.cafe, income=INCOME1)
 
     def test_create_income_if_there_is_no_barista_rates(self):
         """
@@ -169,7 +187,7 @@ class IncomeModelTests(TestCase):
             f"Barista {self.barista} "
             f"has no rate for '{self.cafe}' cafe!",
         ):
-            Income.objects.create(date=date, cafe=self.cafe, income=5555)
+            Income.objects.create(date=date, cafe=self.cafe, income=INCOME1)
 
     def test_calculation_salary(self):
         """
@@ -177,18 +195,27 @@ class IncomeModelTests(TestCase):
         on that day.
         """
 
-        # Create shift.
-        date = DATE2
-        shift = Shift.objects.create(
-            date=date,
+        # Create 2 shifts.
+        date2 = DATE2
+        date3 = DATE3
+        shift1 = Shift.objects.create(
+            date=date2,
+            cafe=self.cafe,
+            barista=self.barista
+        )
+        shift2 = Shift.objects.create(
+            date=date3,
             cafe=self.cafe,
             barista=self.barista
         )
 
         # Create income
-        Income.objects.create(date=date, cafe=self.cafe, income=6870)
+        Income.objects.create(date=date2, cafe=self.cafe, income=INCOME1)
+        Income.objects.create(date=date3, cafe=self.cafe, income=INCOME2)
 
         # Refresh variable
-        shift.refresh_from_db()
+        shift1.refresh_from_db()
+        shift2.refresh_from_db()
 
-        self.assertEqual(shift.salary, 643)
+        self.assertEqual(shift1.salary, SALARY1)
+        self.assertEqual(shift2.salary, SALARY2)
