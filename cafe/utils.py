@@ -3,7 +3,7 @@ from typing import Dict, List
 from django.db.models import QuerySet
 
 
-def calculation_salary(income: int, rate: "Rate") -> int:
+def calculation_salary(income: int, rate: Dict) -> int:
     """
     This function calculates the barista's salary for one shift.
 
@@ -13,14 +13,14 @@ def calculation_salary(income: int, rate: "Rate") -> int:
     returns min_wage. If the income is greater than min_wage, then the function
     returns the result of the calculation using the formula:
 
-    income / 100 * rate.percent + rate.additive
+    income / 100 * rate['percent'] + rate['additive']
 
     We don't need much precision; we can round the value to an integer.
     """
-    if income < rate.min_wage:
-        return int(rate.min_wage)
+    if income < rate["min_wage"]:
+        return int(rate["min_wage"])
     else:
-        salary = income / 100 * rate.percent + rate.additive
+        salary = income / 100 * rate["percent"] + rate["additive"]
         return int(salary)
 
 

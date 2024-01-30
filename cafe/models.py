@@ -116,7 +116,15 @@ class Shift(models.Model):
         rate = Rate.objects.get(cafe=cafe, barista=shift.barista.id)
         try:
             income = Income.objects.get(date=date, cafe=cafe)
-            shift.salary = calculation_salary(income=income.income, rate=rate)
+            rate_dict = {
+                "min_wage": rate.min_wage,
+                "percent": rate.percent,
+                "additive": rate.additive
+            }
+            shift.salary = calculation_salary(
+                income=income.income,
+                rate=rate_dict
+            )
         except Income.DoesNotExist:
             print("No INCOME for this date", Income.DoesNotExist)
 
@@ -189,7 +197,12 @@ class Income(models.Model):
     def calculate_salary(cafe, income, date):
         shift = Shift.objects.get(date=date, cafe=cafe)
         rate = Rate.objects.get(cafe=cafe, barista=shift.barista)
-        salary = calculation_salary(income=income, rate=rate)
+        rate_dict = {
+            "min_wage": rate.min_wage,
+            "percent": rate.percent,
+            "additive": rate.additive
+        }
+        salary = calculation_salary(income=income, rate=rate_dict)
         shifts = Shift.objects.filter(id=shift.id)
         shifts.update(salary=salary)
 
