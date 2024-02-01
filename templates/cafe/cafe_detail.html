@@ -33,21 +33,26 @@
   	</a>
 	</div>
 
-	<div>
+	<br>
+
+	<h4>
+		Total income for the specified period:
 		<strong>
-			Total income for the specified period: $
-			{% if total_income == None %}
-				0
+			$
+		{% if total_income == None %}
+			0
 			{% else %}
 				{{ total_income }}
 			{% endif %}
 		</strong>
-	</div>
+	</h4>
+
+	<br>
 
 	<div>
 		{% if income_array %}
 			<table>
-				<tr>
+				<tr class="table_headers">
 
 					<th>Date</th>
 					<th>Income</th>
@@ -60,7 +65,11 @@
 								{{ line.date }}
 							</td>
 							<td>
-								${{ line.income }}
+								{% if line.income != 0 %}
+									<strong>${{ line.income }}</strong>
+								{% else %}
+									${{ line.income }}
+								{% endif %}
 								{% if line.id != None %}
 									<span style="font-size: 70%">
 										<a href="{% url 'cafe:income-update' pk=line.id %}">
