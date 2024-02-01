@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+
+	<h1>{{ cafe }}</h1>
+
+	<form action="" method="get">
+		<div class="form-inline">
+			{{ date_range }}
+		</div>
+		<p><input type="submit" value="Show" class="btn btn-primary"></p>
+	</form>
+
+	<script>
+    $(function () {
+      $(".datepicker").datetimepicker({
+      format: "Y-m-d",
+      inline:true,
+      timepicker:false,
+      });
+    });
+  </script>
+
+	<div>
+		<a href="{% url 'cafe:income-create' %}?cafe={{ cafe.id }}" class="btn btn-success">
+			Add Income
+  	</a>
+	</div>
+
+	<br>
+
+	<h4>
+		Total income for the specified period:
+		<strong>
+			$
+		{% if total_income == None %}
+			0
+			{% else %}
+				{{ total_income }}
+			{% endif %}
+		</strong>
+	</h4>
+
+	<br>
+
+	<div>
+		{% if income_array %}
+			<table>
+				<tr class="table_headers">
+
+					<th>Date</th>
+					<th>Income</th>
+
+				</tr>
+
+				{% for line in income_array %}
+					<tr>
+							<td>
+								{{ line.date }}
+							</td>
+							<td>
+								{% if line.income != 0 %}
+									<strong>${{ line.income }}</strong>
+								{% else %}
+									${{ line.income }}
+								{% endif %}
+								{% if line.id != None %}
+									<span style="font-size: 70%">
+										<a href="{% url 'cafe:income-update' pk=line.id %}">
+											edit
+										</a>
+									</span>
+								{% endif %}
+							</td>
+					</tr>
+				{% endfor %}
+
+			</table>
+
+		{% else %}
+			<p>There are no incomes in database!</p>
+		{% endif %}
+
+	</div>
+
+{% endblock %}
