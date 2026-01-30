@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load key_value %}
+{% block content %}
+	<h1>Baristas</h1>
+
+	{% if barista_list %}
+			<table>
+				<tr class="table_headers">
+					<th>Barista</th>
+
+					{% for cafe in  cafe_list %}
+						<th>
+							{{ cafe }}
+						</th>
+					{% endfor %}
+
+				</tr>
+			{% for barista in  barista_list %}
+				<tr>
+					<td>
+						<a href="{% url 'cafe:barista-detail-view' pk=barista.id %}"><strong>{{ barista }}</strong></a>
+					</td>
+						{% for cafe in rates|keyvalue:barista.id %}
+							<td>
+								<p>Cafe name: <strong>{{ cafe.cafe_name }}</strong></p>
+								{% if cafe.min_wage == None%}
+								 	<p>Min wage - <strong style="color: red">undefined</strong> </p>
+								{% else %}
+									<p>Min wage - <strong>${{ cafe.min_wage }}</strong></p>
+								{% endif %}
+								{% if cafe.min_wage == None%}
+								 	<p>Percent - <strong style="color: red">undefined</strong> </p>
+								{% else %}
+									<p>Percent - <strong>{{ cafe.percent }}%</strong></p>
+								{% endif %}
+								{% if cafe.min_wage == None%}
+								 	<p>Additive - <strong style="color: red">undefined</strong> </p>
+								{% else %}
+									<p>Additive - <strong>${{ cafe.additive }}</strong></p>
+								{% endif %}
+							</td>
+						{% endfor %}
+				</tr>
+			{% endfor %}
+		</table>
+	{% else %}
+		<p>There are no baristas in database!</p>
+	{% endif %}
+{% endblock %}
